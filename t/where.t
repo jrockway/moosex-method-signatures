@@ -8,6 +8,10 @@ use Test::Exception;
     use Moose;
     has baz => (isa => 'Str', default => 'quux', is => 'ro');
 
+    package Not::Foo::Bar;
+    use Moose;
+    has baz => (isa => 'Str', default => 'quux', is => 'ro');
+
     package Foo;
     use Moose;
     use MooseX::Method::Signatures;
@@ -38,6 +42,7 @@ throws_ok(sub { $foo->m2(0) }, qr/Validation failed/, 'where positional int type
 
 lives_and(sub { is $foo->m3(Foo::Bar->new), 'quux' }, 'where positional class type');
 throws_ok(sub { $foo->m3(Foo::Bar->new({ baz => 'affe' })) }, qr/Validation failed/, 'where positional class type');
+throws_ok(sub { $foo->m3(Not::Foo::Bar->new) }, qr/Validation failed/, 'where validation also checks the type');
 
 lives_and(sub { is $foo->m4(arg => 'foo'), 'foo' }, 'where named string type');
 throws_ok(sub { $foo->m4(arg => 'bar') }, qr/Validation failed/, 'where named string type');
@@ -47,6 +52,7 @@ throws_ok(sub { $foo->m5(arg => 0) }, qr/Validation failed/, 'where named int ty
 
 lives_and(sub { is $foo->m6(arg => Foo::Bar->new), 'quux' }, 'where named class type');
 throws_ok(sub { $foo->m6(arg => Foo::Bar->new({ baz => 'affe' })) }, qr/Validation failed/, 'where named class type');
+throws_ok(sub { $foo->m6(arg => Not::Foo::Bar->new) }, qr/Validation failed/, 'where named validation also checks the type');
 
 lives_ok(sub { $foo->m7(1) }, 'where positional');
 lives_ok(sub { $foo->m8(arg => 1) }, 'where named');
